@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inline-module</title>
+    <script type="inline-module" id="greeting.jsx" loader="react">
+      import React from 'react';
+      const Greeting = (props) => {
+        return <div>{props?.name}</div>
+      }
+      export default Greeting
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="./dist/loaders.js"></script>
+    <script src="./dist/core.js" setup="true"></script>
+    <script type="text/babel" data-type="module">
+      import React from 'react';
+      import ReactDOM from 'react-dom';
+      import Greeting from '#greeting.jsx';
+
+      class Hello extends React.Component {
+        render() {
+          return (
+            <div>
+              Hello {this.props.toWhat}
+              <Greeting name="Johnathon Yao" />
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<Hello toWhat="World" />, document.getElementById('root'));
+    </script>
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>
