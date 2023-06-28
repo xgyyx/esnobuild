@@ -1,4 +1,10 @@
+// @ts-check
 import typescript from '@rollup/plugin-typescript'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 /**
  * @type { import('rollup').RollupOptions }
@@ -41,7 +47,7 @@ const sharedNodeOptions = {
 const createNodeConfig = (isProduction) => {
   const nodeConfig = {
     input: {
-      index: path.resolve(__dirname, 'server/index.mjs')
+      index: path.resolve(__dirname, 'server/index.ts')
     },
     output: {
       ...sharedNodeOptions.output,
@@ -49,7 +55,9 @@ const createNodeConfig = (isProduction) => {
     },
     plugins: [
       typescript({
-        tsconfig: ''
+        target: 'es2019',
+        include: ['server/*.ts', 'types/**'],
+        esModuleInterop: true
       })
     ]
   }

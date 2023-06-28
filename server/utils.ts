@@ -2,7 +2,6 @@ import { spawn, exec } from 'child_process'
 import https from 'https'
 import npa from "npm-package-arg"
 import path, { join } from "path"
-import fs from 'fs'
 import {fileURLToPath} from 'url'
 
 const __filename = fileURLToPath(import.meta.url)

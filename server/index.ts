@@ -1,6 +1,6 @@
 import http from 'http'
 import querystring from 'querystring'
-import { promisifyGet, promisifySpawn, installDependencies } from './utils.mjs'
+import { promisifyGet, installDependencies } from './utils.js'
 import path from 'path'
 import {fileURLToPath} from 'url'
 
@@ -20,6 +20,12 @@ const server = http.createServer(async (req, res) => {
   // handle request to clear temp dir
   if (req.url === '/clearTmpDir') {
     res.write('clear success')
+    res.end()
+    return
+  }
+
+  if (req.url === '/queryPreBuildModule') {
+    res.write('success')
     res.end()
     return
   }
@@ -44,10 +50,6 @@ const server = http.createServer(async (req, res) => {
   // handle common npm package resource request
   if (query.packageName) {
     const targetDir = path.resolve(__dirname, 'downPackages')
-    const command = `tnpm i --prefix ${targetDir} ${query.packageName}`
-    // console.log(`install ${query.packageName} in ${targetDir}: exec command ${command}`)
-    // await promisifySpawn( 'zsh', '-c', command )
-    // await promisifySpawn('zsh', '-c', `tnpm view ${query.packageName} dist.tarball`)
     try {
       const targetPath = await installDependencies({ name: query.packageName, version: query.packageVersion }, targetDir)
       res.write(targetPath)
