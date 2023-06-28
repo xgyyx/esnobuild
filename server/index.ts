@@ -2,37 +2,31 @@ import http from 'http'
 import querystring from 'querystring'
 import { promisifyGet, installDependencies } from './utils.js'
 import path from 'path'
-import {fileURLToPath} from 'url'
+import fs from 'fs'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 const hostname = '127.0.0.1'
 const port = 3027
 
 const server = http.createServer(async (req, res) => {
-  console.log(`receive request: ${req.url}`)
+  console.log(`receive request[${req.method}]: ${req.url}`)
 
-  // reuqest query string should contain one of [originUrl, packageName]
   const [reqPath, queryStr] = (req.url || '').split('?')
   const query = querystring.parse(queryStr || '')
   
-  // handle request to clear temp dir
-  if (req.url === '/clearTmpDir') {
-    res.write('clear success')
-    res.end()
-    return
-  }
-
-  if (req.url === '/queryPreBuildModule') {
-    res.write('success')
-    res.end()
-    return
-  }
-
-  // simulate a reuqest that concurrent write something in a same file
-  if (req.url === 'concurrentWrite') {
-    res.write('success')
+  if (reqPath.startsWith('/tmp/') && !queryStr) {
+    const targetPath = path.join(__dirname, '../', reqPath)
+    console.log('targetPath', targetPath)
+    if (fs.existsSync(targetPath)) {
+      const fileContent = fs.readFileSync(targetPath)
+      res.statusCode = 200
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Content-Type', 'application/x-javascript')
+      res.write(fileContent)
+      res.end()
+      return
+    }
+    res.write('Can not get the file')
     res.end()
     return
   }
@@ -57,6 +51,13 @@ const server = http.createServer(async (req, res) => {
       console.error(err)
       res.write(JSON.stringify(err))
     }
+    res.end()
+    return
+  }
+
+  // handle request to clear temp dir
+  if (reqPath === '/clearTmpDir') {
+    res.write('clear success')
     res.end()
     return
   }

@@ -2,3 +2,4 @@
 /dist
 /server/downPackages
 /server/downloadMeta.json
+/server/tmp
