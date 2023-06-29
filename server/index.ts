@@ -1,10 +1,11 @@
 import http from 'http'
+import express from 'express'
 import querystring from 'querystring'
 import { promisifyGet, installDependencies } from './utils.js'
 import path from 'path'
 import fs from 'fs'
 
-
+const app = express()
 const hostname = '127.0.0.1'
 const port = 3027
 
@@ -14,7 +15,7 @@ const server = http.createServer(async (req, res) => {
   const [reqPath, queryStr] = (req.url || '').split('?')
   const query = querystring.parse(queryStr || '')
   
-  if (reqPath.startsWith('/tmp/') && !queryStr) {
+  if (reqPath.startsWith('/packages/') && !queryStr) {
     const targetPath = path.join(__dirname, '../', reqPath)
     console.log('targetPath', targetPath)
     if (fs.existsSync(targetPath)) {
@@ -27,16 +28,6 @@ const server = http.createServer(async (req, res) => {
       return
     }
     res.write('Can not get the file')
-    res.end()
-    return
-  }
-
-  // handle UMD resource request
-  if (query.originUrl) {
-    res.statusCode = 200
-    res.setHeader('Content-Type', 'application/x-javascript')
-    const rawContent = await promisifyGet(query.originUrl)
-    res.write(rawContent)
     res.end()
     return
   }
@@ -55,6 +46,16 @@ const server = http.createServer(async (req, res) => {
     return
   }
 
+  // handle UMD resource request
+  if (query.originUrl) {
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/x-javascript')
+    const rawContent = await promisifyGet(query.originUrl)
+    res.write(rawContent)
+    res.end()
+    return
+  }
+
   // handle request to clear temp dir
   if (reqPath === '/clearTmpDir') {
     res.write('clear success')
@@ -68,12 +69,27 @@ const server = http.createServer(async (req, res) => {
   res.end()
 })
 
-server.listen(port, hostname, () => {
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.get('/packages/:pkgInfo/index.js', async (req, res) => {
+  const pkgInfo = req.params['pkgInfo']
+  const [pkgName, pkgVersion] = pkgInfo.split('@')
+  // res.send(JSON.stringify({ pkgName, pkgVersion }))
+  const targetDir = path.resolve(__dirname, 'packages')
+  try {
+    const targetPath = await installDependencies({ name: pkgName, version: pkgVersion }, targetDir)
+    res.end(targetPath)
+  }
+})
+
+app.listen(port, () => {
   const url = `http://${hostname}:${port}`
   console.log(`Server running at ${url}`)
 })
 
-server.on('close', function () {
-  console.log('server close')
-  process.exit(1)
-})
+// server.on('close', function () {
+//   console.log('server close')
+//   process.exit(1)
+// })

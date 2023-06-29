@@ -44,19 +44,19 @@ export const promisifySpawn = (...command) => {
   })
 }
 
-
 /**
  * 安装依赖
  * @param {{ name: string; version?: string }} dependency 依赖信息（名称&版本）
  * @param {string} packagePath 包路径
  * @returns 
  */
-export const installDependencies = (dependency, packagePath) => {
+export const installDependencies = (
+    dependency: { name: string, version?: string },
+    packagePath: string
+  ) : Promise<string | null> => {
   return new Promise((resolve, reject) => {
     // 1. 拼接依赖字符串
-    const depString = dependency.version
-      ? `${dependency.name}@${dependency.version}`
-      : dependency.name
+    const depString = `${dependency.name}@${dependency.version || 'latest'}`
 
     // 2. 通过npa查询依赖信息
     const spec = npa(depString)
@@ -88,22 +88,24 @@ export const installDependencies = (dependency, packagePath) => {
     } --no-lockfile --non-interactive --no-bin-links --ignore-engines --skip-integrity-check`
 
     console.log('execCommand', execCommand)
+    console.log('spec', spec, spec.type)
 
-    exec(
-      execCommand,
-      (err, stdout, stderr) => {
-        if (err) {
-          console.warn("got error from install: " + err);
-          reject(
-            err.message.indexOf("versions") >= 0
-              ? new Error("INVALID_VERSION")
-              : err,
-          )
-        } else {
-          resolve(tmpPath)
-        }
-      },
-    )
+    resolve(execCommand)
+    // exec(
+    //   execCommand,
+    //   (err, stdout, stderr) => {
+    //     if (err) {
+    //       console.warn("got error from install: " + err);
+    //       reject(
+    //         err.message.indexOf("versions") >= 0
+    //           ? new Error("INVALID_VERSION")
+    //           : err,
+    //       )
+    //     } else {
+    //       resolve(tmpPath)
+    //     }
+    //   },
+    // )
   })
 }
 
