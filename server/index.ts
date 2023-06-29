@@ -77,11 +77,19 @@ app.get('/packages/:pkgInfo/index.js', async (req, res) => {
   const pkgInfo = req.params['pkgInfo']
   const [pkgName, pkgVersion] = pkgInfo.split('@')
   // res.send(JSON.stringify({ pkgName, pkgVersion }))
-  const targetDir = path.resolve(__dirname, 'packages')
+  const targetInstallDir = path.resolve(__dirname, 'InstalledPackages')
   try {
-    const targetPath = await installDependencies({ name: pkgName, version: pkgVersion }, targetDir)
+    const targetPath = await installDependencies({ name: pkgName, version: pkgVersion }, targetInstallDir)
     res.end(targetPath)
+  } catch(err) {
+    console.error(err)
   }
+})
+
+app.get('/analysis/:packageName/:tempName', async (req, res) => {
+  const packageName = req.params['packageName']
+  const tempName = req.params['tempName']
+  const tempPath = path.resolve(__dirname, `/InstalledPackages/${tempName}`)
 })
 
 app.listen(port, () => {

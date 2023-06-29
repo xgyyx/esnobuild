@@ -72,40 +72,39 @@ export const installDependencies = (
     // } --no-lockfile --non-interactive --no-bin-links --ignore-engines --skip-integrity-check --cache-folder ./ --modules-folder ./`
 
     // 3. 拼接yarn的执行路径
-    const yarnDir = join(__dirname, "../node_modules", "yarn", "lib", "cli")
-    // 4. 构造临时的package.json内容
+    const yarnDir = join(__dirname, "../../node_modules", "yarn", "lib", "cli")
+    // 4. 构造临时的package.json和index.js内容
     const pkgJson = JSON.stringify({
-      name: `${depString}_${Math.random()}`,
+      name: `${depString.replace('@', '_')}_${Math.random()}`,
+      main: 'index.js',
       dependencies: {
         [`${dependency.name}`]: `${dependency.version || 'latest'}`
       }
     })
+    const indexJs = `import ${dependency.name} from "${dependency.name}"
+      export default ${dependency.name}`
     // 5. 生成临时安装路径
     const tmpPath = `${packagePath}/${dependency.name}_${Math.random()}`
     // 6. 构造yarn安装命令
-    const execCommand = `mkdir -p ${tmpPath} && cd ${tmpPath} && touch package.json && echo '${pkgJson}' >> package.json && node ${yarnDir} add ${depString} ${
+    const execCommand = `mkdir -p ${tmpPath} && cd ${tmpPath} && touch index.js && echo '${indexJs}' >> index.js && touch package.json && echo '${pkgJson}' >> package.json && node ${yarnDir} add ${depString} ${
       spec.type === "git" ? "" : "--ignore-scripts"
     } --no-lockfile --non-interactive --no-bin-links --ignore-engines --skip-integrity-check`
 
-    console.log('execCommand', execCommand)
-    console.log('spec', spec, spec.type)
-
-    resolve(execCommand)
-    // exec(
-    //   execCommand,
-    //   (err, stdout, stderr) => {
-    //     if (err) {
-    //       console.warn("got error from install: " + err);
-    //       reject(
-    //         err.message.indexOf("versions") >= 0
-    //           ? new Error("INVALID_VERSION")
-    //           : err,
-    //       )
-    //     } else {
-    //       resolve(tmpPath)
-    //     }
-    //   },
-    // )
+    exec(
+      execCommand,
+      (err, stdout, stderr) => {
+        if (err) {
+          console.warn("got error from install: " + err);
+          reject(
+            err.message.indexOf("versions") >= 0
+              ? new Error("INVALID_VERSION")
+              : err,
+          )
+        } else {
+          resolve(tmpPath)
+        }
+      },
+    )
   })
 }
 
