@@ -56,7 +56,7 @@ const createNodeConfig = (isProduction) => {
     plugins: [
       typescript({
         target: 'es2019',
-        include: ['server/*.ts', 'types/**'],
+        include: ['server/**/*', 'types/**'],
         esModuleInterop: true
       })
     ]

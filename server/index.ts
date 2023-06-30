@@ -2,6 +2,7 @@ import http from 'http'
 import express from 'express'
 import querystring from 'querystring'
 import { promisifyGet, installDependencies } from './utils.js'
+import { resolveDependencies } from './optimizer'
 import path from 'path'
 import fs from 'fs'
 
@@ -86,10 +87,11 @@ app.get('/packages/:pkgInfo/index.js', async (req, res) => {
   }
 })
 
-app.get('/analysis/:packageName/:tempName', async (req, res) => {
-  const packageName = req.params['packageName']
+app.get('/analysis/:tempName/index.js', async (req, res) => {
   const tempName = req.params['tempName']
   const tempPath = path.resolve(__dirname, `/InstalledPackages/${tempName}`)
+  await resolveDependencies(tempPath)
+  res.end('success')
 })
 
 app.listen(port, () => {

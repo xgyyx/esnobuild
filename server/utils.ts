@@ -107,9 +107,3 @@ export const installDependencies = (
     )
   })
 }
-
-/**
- * 构建ESM模块
- * @param {string} target 目标目录
- */
-export const resolveDependencies = async (target) => {}
