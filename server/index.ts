@@ -78,6 +78,16 @@ app.get('/packages/:pkgInfo/index.js', async (req, res) => {
   const pkgInfo = req.params['pkgInfo']
   const [pkgName, pkgVersion] = pkgInfo.split('@')
   // res.send(JSON.stringify({ pkgName, pkgVersion }))
+  // If this package has been caches, then return
+  const cachePath = path.join(__dirname, 'cachePackages', pkgName)
+  if (fs.existsSync(cachePath)) {
+    const fileContent = fs.readFileSync(path.join(cachePath, 'index.js'))
+    res.statusCode = 200
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'application/x-javascript')
+    res.write(fileContent)
+    res.end()
+  }
   const targetInstallDir = path.resolve(__dirname, 'InstalledPackages')
   try {
     const targetPath = await installDependencies({ name: pkgName, version: pkgVersion }, targetInstallDir)

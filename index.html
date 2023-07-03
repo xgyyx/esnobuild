@@ -7,9 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>inline-module</title>
     <script type="inline-module" id="greeting.jsx" loader="react">
-      import React from 'react';
+      import React, { useState } from 'react';
+      console.log(React)
       const Greeting = (props) => {
-        return <div>{props?.name}</div>
+        const [count, setCount] = useState(0)
+        return (
+          <>
+            <div>{props?.name}</div>
+            <button onClick={() => setCount(count + 1)}>add Count {count}</button>
+          </>
+        )
       }
       export default Greeting
     </script>

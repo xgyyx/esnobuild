@@ -8,6 +8,10 @@ import path from 'path'
 export const resolveDependencies = async (targetPath: string) => {
   const deps: Record<string, string> = {}
   await scanImports(targetPath, 'index.js', deps)
+  if (!Object.keys(deps).length) {
+    return
+  }
+  await buildDependencyModules(deps)
 }
 
 /**
@@ -48,7 +52,6 @@ export const esbuildScanImportPlugin = (deps: Record<string, string>): Plugin =>
           if (deps[args.path]) return
           deps[args.path] = args.resolveDir
           const result = await build.resolve(args.path, {
-            kind: 'import-statement',
             resolveDir: './node_modules'
           })
           if (result.errors.length > 0) {
@@ -63,6 +66,27 @@ export const esbuildScanImportPlugin = (deps: Record<string, string>): Plugin =>
 }
 
 /**
- * 
+ * buildDependencyModules
  */
-export const a = () => {}
+export const buildDependencyModules = async (deps: Record<string, string>) => {
+  const targetDir = path.join(__dirname, 'cachePackages')
+  await Object.keys(deps).map(async (id) => {
+    const targetPath = deps[id]
+    const result = await build({
+      absWorkingDir: targetPath,
+      entryPoints: [targetPath],
+      bundle: true,
+      format: 'esm',
+      metafile: true,
+      target: [
+        'es2020',
+        'chrome58',
+        'edge16',
+        'firefox57',
+        'node12',
+        'safari11',
+      ],
+      outdir: path.join(targetDir, id)
+    })
+  })
+}
