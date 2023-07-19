@@ -122,6 +122,7 @@ function setup() {
 if (currentScript.getAttribute('setup') !== 'false') {
   setup();
 }
+window.setup = setup
 
 window.inlineImport = async (moduleID) => {
   const { imports } = map;

@@ -6,8 +6,8 @@
   "scripts": {
     "build": "npm run build:loaders & npm run build:core",
     "": "esbuild loaders/index.js --bundle --outfile=dist/loaders.js --minify",
-    "build:loaders": "esbuild loaders/index.js --bundle --outfile=dist/loaders.js",
-    "build:core": "esbuild index.js --bundle --outfile=dist/core.js",
+    "build:loaders": "esbuild loaders/index.js --bundle --outfile=dist/scripts/loaders.js",
+    "build:core": "esbuild scripts/index.js --bundle --outfile=dist/scripts/core.js",
     "prepublishOnly": "npm run build && npm run test",
     "test": "jest",
     "start:prebuildServer": "node dist/node/index.js",

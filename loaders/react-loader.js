@@ -16,13 +16,8 @@ export default {
       ...options
     }); 
   },
-  // imports: {
-  //   react: 'https://unpkg.com/@esm-bundle/react/esm/react.development.js',
-  //   'react-dom': 'https://unpkg.com/@esm-bundle/react-dom/esm/react-dom.development.js',
-  //   'react-is': 'https://unpkg.com/@esm-bundle/react-is/esm/react-is.development.js',
-  // },
   imports: {
-    react: 'http://127.0.0.1:3027/packages/react/index.js',
+    react: 'https://unpkg.com/@esm-bundle/react/esm/react.development.js',
     'react-dom': 'https://unpkg.com/@esm-bundle/react-dom/esm/react-dom.development.js',
     'react-is': 'https://unpkg.com/@esm-bundle/react-is/esm/react-is.development.js',
   },
