@@ -89,7 +89,11 @@
       parentNode = currentDoc.getElementsByTagName('head')[0]
     }
     newScript.innerText = content
-    parentNode.appendChild(newScript)
+    if (id === 'entry') {
+      parentNode.appendChild(newScript)
+    } else {
+      parentNode.firstChild.after(newScript)
+    }
   }
 </script>
 <script>
