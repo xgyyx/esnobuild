@@ -123,6 +123,7 @@ if (currentScript.getAttribute('setup') !== 'false') {
   setup();
 }
 window.setup = setup
+window.createBlob = createBlob
 
 window.inlineImport = async (moduleID) => {
   const { imports } = map;

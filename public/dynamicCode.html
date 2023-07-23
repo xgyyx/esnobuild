@@ -28,7 +28,7 @@
   <span>greeting.jsx</span>
   <textarea id="greeting.jsx" name="greeting.jsx" rows="20" cols="50">
     import React, { useState } from 'react';
-      console.log(React);
+      console.log('greeting.jsx', React);
       const Greeting = (props) => {
         const [count, setCount] = useState(0);
         return (
@@ -55,6 +55,22 @@
     const entry = iframeDocument.getElementById('entry')
     updateScript(iframeDocument, 'greeting.jsx', greetingJsxCode)
     updateScript(iframeDocument, 'entry', entryCode)
+
+    const importMapEl = iframeDocument.querySelector('script[type="importmap"]')
+    if (importMapEl) {
+      importMapEl.parentNode.removeChild(importMapEl)
+    }
+    const modules = iframeDocument.querySelectorAll('script[type="module"]');
+    [...modules].forEach(module => {
+      const src = module.getAttribute('src') || ''
+      if (src.startsWith('blob:')) {
+        module.parentNode.removeChild(module)
+      }
+    });
+    
+    const HTMLcontent = iframeDocument.documentElement.outerHTML
+    const tempUrl = iframe.contentWindow.createBlob(HTMLcontent, 'text/html')
+    iframe.src = tempUrl
   }
   const updateScript = (currentDoc, id, content) => {
     const oldScript = currentDoc.getElementById(id)
