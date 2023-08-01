@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <span>entry file</span>
+  <textarea id="entry" name="entry" rows="20" cols="50">
+    import React from 'react';
+      import ReactDOM from 'react-dom';
+      import Greeting from '#greeting.jsx';
+
+      class Hello extends React.Component {
+        render() {
+          return (
+            <div>
+              Hello {this.props.toWhat}
+              <Greeting name="Johnathon Yao" />
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<Hello toWhat="World" />, document.getElementById('root'));
+  </textarea>
+  <span>greeting.jsx</span>
+  <textarea id="greeting.jsx" name="greeting.jsx" rows="20" cols="50">
+    import React, { useState } from 'react';
+      console.log('greeting.jsx', React);
+      const Greeting = (props) => {
+        const [count, setCount] = useState(0);
+        return (
+          <>
+            <div>{props?.name}</div>
+            <button onClick={() => setCount(count + 1)}>add Count {count}</button>
+          </>
+        )
+      };
+      export default Greeting;
+  </textarea>
+  <div>
+    <button onclick="onUpdateCode()">update code</button>
+  </div>
+  <iframe id="displayIframe"></iframe>
+</body>
+<script>
+  const onUpdateCode = () => {
+    const entryCode = document.getElementById('entry').value.replace(/\n\r?/g, '')
+    const greetingJsxCode = document.getElementById('greeting.jsx').value.replace(/\n\r?/g, '')
+    // console.log(entryCode, greetingJsxCode)
+    const iframe = document.getElementById('displayIframe')
+    const iframeWindow = iframe.contentWindow
+    const iframeDocument = iframe.contentWindow.document
+    const entry = iframeDocument.getElementById('entry')
+    updateScript(iframeDocument, 'greeting.jsx', greetingJsxCode)
+    updateScript(iframeDocument, 'entry', entryCode)
+
+    const importMapEl = iframeDocument.querySelector('script[type="importmap"]')
+    if (importMapEl) {
+      importMapEl.parentNode.removeChild(importMapEl)
+    }
+    if (iframeWindow.setup) {
+      iframeWindow.setup()
+    }
+    const { availablePresets, transform } = iframeWindow.Babel
+    const entryElement = document.getElementById('entry')
+    const { code: resolved, map: sourceMap } = transform(entryCode, {
+      sourceMap: true,
+      presets: [availablePresets.react, availablePresets.typescript],
+      filename: `${entryElement.id}_transform`
+    })
+    updateScript(iframeDocument, `${entryElement.id}_transform`, resolved, { type: 'module', id: `${entryElement.id}_transform` })
+
+    // const modules = iframeDocument.querySelectorAll('script[type="module"]');
+    // [...modules].forEach(module => {
+    //   const src = module.getAttribute('src') || ''
+    //   if (src.startsWith('blob:')) {
+    //     module.parentNode.removeChild(module)
+    //   }
+    // });
+    
+    // const HTMLcontent = iframeDocument.documentElement.outerHTML
+    // const tempUrl = iframe.contentWindow.createBlob(HTMLcontent, 'text/html')
+    // iframe.src = tempUrl
+  }
+  const updateScript = (currentDoc, id, content, extraAttribute = {}) => {
+    const oldScript = currentDoc.getElementById(id)
+    const newScript = currentDoc.createElement('script')
+    let parentNode
+    if (oldScript) {
+      const attrs = oldScript.getAttributeNames()
+      if (Array.isArray(attrs) && attrs.length) {
+        attrs.map(attrName => {
+          newScript.setAttribute(attrName, oldScript.getAttribute(attrName))
+        })
+      }
+      parentNode = oldScript.parentNode
+      parentNode.removeChild(oldScript)
+    } else {
+      parentNode = currentDoc.getElementsByTagName('head')[0]
+    }
+    if (Object.keys(extraAttribute).length) {
+      Object.keys(extraAttribute).map(attrName => {
+        newScript.setAttribute(attrName, extraAttribute[attrName])
+      })
+    }
+    newScript.innerText = content
+    if (id === 'entry' || id.startsWith('entry_')) {
+      parentNode.appendChild(newScript)
+    } else {
+      parentNode.firstChild.after(newScript)
+    }
+  }
+</script>
+<script>
+  (async function main () {
+    const response = await fetch(
+      '/public/emptyIframe.html',
+      { mode: 'no-cors' }
+    )
+    const html = await response.text()
+    const iframe = document.getElementById('displayIframe')
+    iframe.contentWindow.document.write(html)
+  })()
+</script>
+</html>
